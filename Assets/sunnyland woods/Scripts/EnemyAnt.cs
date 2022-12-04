@@ -7,12 +7,12 @@ public class EnemyAnt : MonoBehaviour
     //Empty objects in the scene which represent the patrol points
     public Transform[] pointsObjects;
     public int speedWalking;//Patrol Ant's speed
-    public GameObject acornPrefab;//Bellots which spares the Ant when dies.
+    public GameObject cherryPrefab;//Cherries which spares the Ant when dies.
 
     [Header("Attack Player")]
     //Distance which the Ant will stop the patrol and will follow the player
     public float distanceToPlayer;
-    public GameObject player;
+    GameObject player;
     public int speedAttack;//Ant's speed when it will be in Attack Mode
     public int speedAnimation;//Ant's speed animation (during pursuit Mode)
     public int damage;
@@ -29,6 +29,9 @@ public class EnemyAnt : MonoBehaviour
     {
         spriteRenderer = GetComponent<SpriteRenderer>();
         anim = GetComponent<Animator>();
+        player = GameObject.FindGameObjectWithTag("Player");
+        //Get Points Objects (Finish this later)
+        //pointsObjects = GameObject.FindGameObjectWithTag("AntPositions");
     }
 
     // Start is called before the first frame update
@@ -98,9 +101,21 @@ public class EnemyAnt : MonoBehaviour
                 //Damage player's life
                 collision.collider.GetComponent<PlayerHealth>().TakeDamage(damage);
             }
-            //Ant dies as long as the collision happened  with the Player
-            anim.SetTrigger("Death");
-            Destroy(gameObject, 0.3f);
+            Death();
+        }
+    }
+    void Death()
+    {
+        Loot();
+        //Ant dies ("Morision") as long as the collision happened  with the Player
+        anim.SetTrigger("Death");
+        Destroy(gameObject, 0.3f);
+    }
+    void Loot()
+    {
+        for (int i = 0; i < Random.Range(1, 5); i++)
+        {
+            Instantiate(cherryPrefab, transform.position, transform.rotation);
         }
     }
 }

@@ -5,8 +5,10 @@ using UnityEngine.UI;
 
 public class PlayerHealth : MonoBehaviour
 {
+    [Header("Health")]
     public float maxHealth;
     public float currentHealth;
+    public float recoveryHealth;
 
     [Header("UI")]
     public Image acornUI;
@@ -56,10 +58,21 @@ public class PlayerHealth : MonoBehaviour
     }
     void Death()
     {
-        playerMovement.DeathVelocity();
         GetComponent<CircleCollider2D>().enabled = false;
         GetComponent<Rigidbody2D>().AddForce(Vector2.up * forceJumpDeath);
         //GetComponent<Rigidbody2D>().gravityScale = 10;
         transform.localScale = Vector3.Scale(transform.localScale, new Vector3(2, 2, 2));
+    }
+    private void OnTriggerEnter2D(Collider2D collision)
+    {
+        if(collision.CompareTag("Acorn"))
+        {
+            currentHealth += recoveryHealth;
+            //Checking current health is always lower or equal than maxHealth
+            //if (currentHealth > maxHealth) currentHealth = maxHealth;
+            currentHealth = Mathf.Clamp(currentHealth, 0, maxHealth);
+            acornUI.fillAmount = currentHealth / maxHealth;
+            Destroy(collision.gameObject);
+        }
     }
 }

@@ -23,6 +23,7 @@ public class PlayerMovement : MonoBehaviour
     Animator anim;
     Rigidbody2D rb2D;
     SpriteRenderer spriteRenderer;
+    PlayerHealth playerHealth;
     Vector2 targetVelocity; //Speed I want to move the player
     Vector2 dampVelocity;//var. where I'm going to save the current speed of the player
     
@@ -31,6 +32,7 @@ public class PlayerMovement : MonoBehaviour
     {
         anim = GetComponent<Animator>();
         rb2D = GetComponent<Rigidbody2D>();
+        playerHealth = GetComponent<PlayerHealth>();
         spriteRenderer = GetComponent<SpriteRenderer>();
         canMove = true;
     }
@@ -110,10 +112,13 @@ public class PlayerMovement : MonoBehaviour
         if (horizontal < 0) spriteRenderer.flipX = true;
         else spriteRenderer.flipX = false;
     }
-    void ChangeGravity()
+    public void ChangeGravity()
     {
-        //IF player is falling then we'll increase the gravity value
-        if (rb2D.velocity.y < 0) rb2D.gravityScale = 2.5f;
+        //If player is falling & is still alive then we'll increase the gravity value
+        if (rb2D.velocity.y < 0 && playerHealth.currentHealth > 0) rb2D.gravityScale = 1.5f;
+        //If player is falling & is still alive then we'll increase the gravity value
+        else if (rb2D.velocity.y < 0 && playerHealth.currentHealth <= 0) rb2D.gravityScale = 3;
+        //If player is rising then we'll keep gravity scale to def.
         else rb2D.gravityScale = 1;
     }
     void CanMoveToTrue()
@@ -124,9 +129,4 @@ public class PlayerMovement : MonoBehaviour
     {
         targetVelocity = Vector2.zero;
     }
-    public void DeathVelocity()
-    {
-        targetVelocity = new Vector2(0,rb2D.velocity.y*10f);
-    }
-
 }
