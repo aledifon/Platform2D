@@ -15,6 +15,7 @@ public class PlayerHealth : MonoBehaviour
 
     [Header("Death")]
     public float forceJumpDeath;
+    public GameManager gameManager;
 
     Animator anim;
     PlayerMovement playerMovement;
@@ -58,9 +59,12 @@ public class PlayerHealth : MonoBehaviour
     }
     void Death()
     {
+        //Call the GameOver method of the GameManager script
+        gameManager.GameOver();
+        //When the player dies disable his collider, add +Y Force and increase x2 his size
         GetComponent<CircleCollider2D>().enabled = false;
         GetComponent<Rigidbody2D>().AddForce(Vector2.up * forceJumpDeath);
-        //GetComponent<Rigidbody2D>().gravityScale = 10;
+        //GetComponent<Rigidbody2D>().gravityScale = 10;        
         transform.localScale = Vector3.Scale(transform.localScale, new Vector3(2, 2, 2));
     }
     private void OnTriggerEnter2D(Collider2D collision)
