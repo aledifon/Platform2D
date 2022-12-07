@@ -15,6 +15,12 @@ public class PlayerMovement : MonoBehaviour
     public LayerMask groundLayer;//Layer where the ground will be contained
     public float rayLength;//ray Length
     public bool isGrounded;//var which indicates if we are or not touching the ground
+    public bool isOnSlope;//var which indicates if wa are on flat floor or a slope
+    //private bool isOnSlopeUp;//var which indicates if wa are on flat floor or a slope
+    //private bool isOnSlopeDown;//var which indicates if wa are on flat floor or a slope
+    private Vector2 slopeNormalPerp;//Perpendicular vector to the Normal one with the Floor
+    private float slopeDownAngle;//Angle between the Normal vector and the +Y direction.
+    private float slopeDownAngleOld;//Former value of slopeDownAngle
 
     [Header("Jump")]
     public float jumpForce;
@@ -47,6 +53,7 @@ public class PlayerMovement : MonoBehaviour
         Flip();
         Animating();
         IsGrounded();
+        //IsOnSlope();
         JumpPressed();
         //Attack();
         TargetVelocity();        
@@ -71,6 +78,11 @@ public class PlayerMovement : MonoBehaviour
     void TargetVelocity()
     {
         targetVelocity = new Vector2(horizontal * speed, rb2D.velocity.y);
+        //if (!isOnSlope)
+        //    targetVelocity = new Vector2(horizontal * speed, rb2D.velocity.y);
+        //else
+        //    targetVelocity = new Vector2(horizontal * speed, rb2D.velocity.y*10);
+
     }
     void Animating()
     {
@@ -107,6 +119,27 @@ public class PlayerMovement : MonoBehaviour
         isGrounded = Physics2D.Raycast(groundCheck.position, Vector2.down, rayLength, groundLayer);
         Debug.DrawRay(groundCheck.position, Vector2.down * rayLength, Color.red);
     }
+    void IsOnSlope()
+    {
+        RaycastHit2D hit = Physics2D.Raycast(groundCheck.position, Vector2.down, rayLength, groundLayer);
+        if (hit)
+        {
+            //Get the perpendicular vector to the normal (Takes the per. vector counting in clockwise dir.)
+            slopeNormalPerp = Vector2.Perpendicular(hit.normal);
+            //Get the angle between the Normal vector & the +Y vector)
+            slopeDownAngle = Vector2.Angle(hit.normal, Vector2.up);
+
+            //If the angle has changed we consider that we're in a Slope. Otherwise, we are in flat floor
+            isOnSlope = (slopeDownAngle>5);
+            
+            //Update slope Down Angle value
+            //slopeDownAngleOld = slopeDownAngle;
+
+            //Debugging Normal & Perp. to Normal
+            Debug.DrawRay(hit.point, slopeNormalPerp, Color.blue);
+            Debug.DrawRay(hit.point, hit.normal, Color.green);
+        }
+    }
     void Flip()
     {
         if (horizontal < 0) spriteRenderer.flipX = true;
@@ -128,5 +161,18 @@ public class PlayerMovement : MonoBehaviour
     public void ResetVelocity()
     {
         targetVelocity = Vector2.zero;
+    }
+    private void OnCollisionEnter2D(Collision2D collision)
+    {
+        //Set the player as child of the platform
+        if (collision.collider.CompareTag("Platform"))              
+            transform.SetParent(collision.transform);
+        
+    }
+    private void OnCollisionExit2D(Collision2D collision)
+    {
+        //Unset the player as child of the platform
+        if (collision.collider.CompareTag("Platform"))
+            transform.SetParent(null);
     }
 }
